@@ -1,0 +1,28 @@
+#ISAQUE DE OLIVEIRA DOS SANTOS
+POST http://127.0.0.1:8000/produto/ HTTP/1.1
+content-type: application/json
+
+{
+    "nome" : "Hambúrguer Artesanal",
+    "descricao" : "Pão brioche, carne 180g e queijo prato",
+    "valor_unitario" : 35.90
+}
+
+### 2. READ (GET) - Listar todos os produtos
+GET http://127.0.0.1:8000/produto/ HTTP/1.1
+
+### 3. READ (GET) - Buscar um produto específico por ID
+GET http://127.0.0.1:8000/produto/1 HTTP/1.1
+
+### 4. UPDATE (PUT) - Atualizar os dados de um produto
+PUT http://127.0.0.1:8000/produto/1 HTTP/1.1
+content-type: application/json
+
+{
+    "nome" : "Hambúrguer Artesanal Gourmet",
+    "descricao" : "Pão brioche, carne 200g, queijo prato e bacon",
+    "valor_unitario" : 42.00
+}
+
+### 5. DELETE - Remover um produto do sistema
+DELETE http://127.0.0.1:8000/produto/1 HTTP/1.1
