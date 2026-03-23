@@ -17,12 +17,12 @@ POST {{baseUrl}}/funcionario/ HTTP/1.1
 content-type: application/json
 
 {
-    "nome": "João de Oliveira dos Santos",
+    "nome": "Admin Sistema",
     "matricula": "151694",
-    "cpf": "44566788566",
+    "cpf": "11111111111",
     "telefone": "11999999999",
     "grupo": 1,
-    "senha": "Isaq99249782A"
+    "senha": "Admin123!"
 }
 
 ###
@@ -31,12 +31,12 @@ POST {{baseUrl}}/funcionario/ HTTP/1.1
 content-type: application/json
 
 {
-    "nome": "Maria Fernanda",
+    "nome": "Atendente Balcão",
     "matricula": "151695",
-    "cpf": "55677889900",
+    "cpf": "22222222222",
     "telefone": "11988887777",
     "grupo": 2,
-    "senha": "SenhaForte123"
+    "senha": "Balcao123!"
 }
 
 ###
@@ -45,12 +45,12 @@ POST {{baseUrl}}/funcionario/ HTTP/1.1
 content-type: application/json
 
 {
-    "nome": "Paulo Ricardo",
+    "nome": "Atendente Caixa",
     "matricula": "151696",
-    "cpf": "66788990011",
+    "cpf": "33333333333",
     "telefone": "11977776666",
-    "grupo": 1,
-    "senha": "OutraSenha456"
+    "grupo": 3,
+    "senha": "Caixa123!"
 }
 
 ###
