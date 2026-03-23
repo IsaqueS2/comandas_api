@@ -1,30 +1,70 @@
 #ISAQUE DE OLIVEIRA DOS SANTOS
-GET http://localhost:8000/funcionario/ HTTP/1.1
-### Verbo GET – listar um
-GET http://localhost:8000/funcionario/10 HTTP/1.1
-### Verbo POST – adicionar 
-POST http://127.0.0.1:8000/funcionario/ HTTP/1.1
+# URL base da API
+@baseUrl = http://localhost:8000
+# Altere o @id para o ID retornado no POST
+@id = 1
+
+### GET – Listar todos os funcionários
+GET {{baseUrl}}/funcionario/ HTTP/1.1
+
+###
+### GET – Buscar funcionário por ID
+GET {{baseUrl}}/funcionario/{{id}} HTTP/1.1
+
+###
+### POST – Cadastrar novo funcionário
+POST {{baseUrl}}/funcionario/ HTTP/1.1
 content-type: application/json
 
 {
-    "nome" : "Isaque de Oliveira dos Santos",
-    "matricula" : "151694",
-    "cpf" : "12345678900",
-    "telefone" : "11999999999",
-    "grupo" : 1,
-    "senha" : "Isaq99249782A"
+    "nome": "João de Oliveira dos Santos",
+    "matricula": "151694",
+    "cpf": "44566788566",
+    "telefone": "11999999999",
+    "grupo": 1,
+    "senha": "Isaq99249782A"
 }
-### Verbo PUT – atualiza (AJUSTE O ID NO FINAL DA URL)
-PUT http://127.0.0.1:8000/funcionario/1 HTTP/1.1
+
+###
+### POST – Cadastrar funcionário 2
+POST {{baseUrl}}/funcionario/ HTTP/1.1
 content-type: application/json
 
 {
-    "nome" : "Isaque Oliveira",
-    "matricula" : "151516",
-    "cpf" : "01309988934",
-    "telefone" : "49999471975",
-    "grupo" : 1,
-    "senha" : "novasenha123"
+    "nome": "Maria Fernanda",
+    "matricula": "151695",
+    "cpf": "55677889900",
+    "telefone": "11988887777",
+    "grupo": 2,
+    "senha": "SenhaForte123"
 }
-### Verbo DELETE – excluir (AJUSTE O ID NO FINAL DA URL)
-DELETE http://127.0.0.1:8000/funcionario/3 HTTP/1.1
+
+###
+### POST – Cadastrar funcionário 3
+POST {{baseUrl}}/funcionario/ HTTP/1.1
+content-type: application/json
+
+{
+    "nome": "Paulo Ricardo",
+    "matricula": "151696",
+    "cpf": "66788990011",
+    "telefone": "11977776666",
+    "grupo": 1,
+    "senha": "OutraSenha456"
+}
+
+###
+### PUT – Atualizar funcionário
+PUT {{baseUrl}}/funcionario/{{id}} HTTP/1.1
+content-type: application/json
+
+{
+    "nome": "Isaque Oliveira",
+    "matricula": "151516",
+    "telefone": "49999471975",
+    "senha": "novasenha123"
+}
+
+###
+### DELETE – Excluir funcionário
+DELETE {{baseUrl}}/funcionario/{{id}} HTTP/1.1
