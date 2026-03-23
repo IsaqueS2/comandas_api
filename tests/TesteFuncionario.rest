@@ -1,8 +1,8 @@
 #ISAQUE DE OLIVEIRA DOS SANTOS
 # URL base da API
 @baseUrl = http://localhost:8000
-# Altere o @id para o ID retornado no POST
-@id = 1
+
+@id = 6
 
 ### GET – Listar todos os funcionários
 GET {{baseUrl}}/funcionario/ HTTP/1.1
@@ -17,8 +17,8 @@ POST {{baseUrl}}/funcionario/ HTTP/1.1
 content-type: application/json
 
 {
-    "nome": "Admin Sistema",
-    "matricula": "151694",
+    "nome": "Isaque Oliveira dos Santos",
+    "matricula": "123455",
     "cpf": "11111111111",
     "telefone": "11999999999",
     "grupo": 1,
