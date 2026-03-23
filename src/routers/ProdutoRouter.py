@@ -112,7 +112,7 @@ async def put_produto(
 
 
 @router.delete(
-    "/produto/{id_prod}", status_code=status.HTTP_204_NO_CONTENT, tags=["Produto"]
+    "/produto/{id_prod}", status_code=status.HTTP_200_OK, tags=["Produto"]
 )
 async def delete_produto(id_prod: int, db: Session = Depends(get_db)):
     """Remove um produto"""
@@ -124,7 +124,7 @@ async def delete_produto(id_prod: int, db: Session = Depends(get_db)):
             )
         db.delete(produto)
         db.commit()
-        return None
+        return {"msg": "Produto deletado com sucesso", "id": id_prod}
     except HTTPException:
         raise
     except Exception as e:

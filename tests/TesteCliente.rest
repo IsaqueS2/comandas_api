@@ -1,8 +1,8 @@
 #ISAQUE DE OLIVEIRA DOS SANTOS
 # URL base da API
 @baseUrl = http://localhost:8000
-# Altere o @id para o ID retornado no POST
-@id = 1
+
+@id = 6
 
 ### GET – Listar todos os clientes
 GET {{baseUrl}}/cliente/ HTTP/1.1
@@ -17,8 +17,8 @@ POST {{baseUrl}}/cliente/ HTTP/1.1
 content-type: application/json
 
 {
-    "nome": "Pedro de Oliveira dos Santos",
-    "cpf": "14319919544",
+    "nome": "Isaque de Oliveira dos Santos",
+    "cpf": "13134567899",
     "telefone": "49999999999"
 }
 

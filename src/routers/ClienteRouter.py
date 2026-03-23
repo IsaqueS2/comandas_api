@@ -129,7 +129,7 @@ async def put_cliente(
 
 
 @router.delete(
-    "/cliente/{id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Cliente"]
+    "/cliente/{id}", status_code=status.HTTP_200_OK, tags=["Cliente"]
 )
 async def delete_cliente(id: int, db: Session = Depends(get_db)):
     """Remove um cliente"""
@@ -141,7 +141,7 @@ async def delete_cliente(id: int, db: Session = Depends(get_db)):
             )
         db.delete(cliente)
         db.commit()
-        return None
+        return {"msg": "Cliente deletado com sucesso", "id": id}
     except HTTPException:
         raise
     except Exception as e:
