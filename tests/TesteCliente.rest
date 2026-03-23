@@ -1,26 +1,59 @@
 #ISAQUE DE OLIVEIRA DOS SANTOS
+# URL base da API
+@baseUrl = http://localhost:8000
+# Altere o @id para o ID retornado no POST
+@id = 1
 
-GET http://localhost:8000/cliente/ HTTP/1.1
+### GET – Listar todos os clientes
+GET {{baseUrl}}/cliente/ HTTP/1.1
 
-### Verbo POST – Adicionar seu Cliente (USE SEUS DADOS AQUI)
-POST http://127.0.0.1:8000/cliente/ HTTP/1.1
+###
+### GET – Buscar cliente por ID
+GET {{baseUrl}}/cliente/{{id}} HTTP/1.1
+
+###
+### POST – Cadastrar novo cliente
+POST {{baseUrl}}/cliente/ HTTP/1.1
 content-type: application/json
 
 {
-    "nome" : "Isaque de Oliveira dos Santos",
-    "cpf" : "123.456.789-00",
-    "telefone" : "49999999999"
+    "nome": "Pedro de Oliveira dos Santos",
+    "cpf": "14319919544",
+    "telefone": "49999999999"
 }
 
-### Verbo PUT – Atualizar Cliente
-PUT http://127.0.0.1:8000/cliente/1 HTTP/1.1
+###
+### POST – Cadastrar cliente 2
+POST {{baseUrl}}/cliente/ HTTP/1.1
 content-type: application/json
 
 {
-    "nome" : "Isaque Santos",
-    "cpf" : "123.456.789-00",
-    "telefone" : "49888888888"
+    "nome": "Ana Paula Souza",
+    "cpf": "22345678901",
+    "telefone": "48988887777"
 }
 
-### Verbo DELETE - excluir cliente 1
-DELETE http://127.0.0.1:8000/cliente/1 HTTP/1.1
+###
+### POST – Cadastrar cliente 3
+POST {{baseUrl}}/cliente/ HTTP/1.1
+content-type: application/json
+
+{
+    "nome": "Carlos Mendes",
+    "cpf": "33456789012",
+    "telefone": "47977776666"
+}
+
+###
+### PUT – Atualizar cliente
+PUT {{baseUrl}}/cliente/{{id}} HTTP/1.1
+content-type: application/json
+
+{
+    "nome": "Isaque Santos",
+    "telefone": "49888888888"
+}
+
+###
+### DELETE – Excluir cliente
+DELETE {{baseUrl}}/cliente/{{id}} HTTP/1.1
