@@ -2,7 +2,7 @@
 # URL base da API
 @baseUrl = http://localhost:8000
 
-@id = 7
+@id = 6
 
 ### GET – Listar todos os produtos
 GET {{baseUrl}}/produto/ HTTP/1.1
@@ -50,9 +50,7 @@ PUT {{baseUrl}}/produto/{{id}} HTTP/1.1
 content-type: application/json
 
 {
-    "nome": "Bolacha Doce",
-    "descricao": "Doce",
-    "valor_unitario": 12.00
+    "nome": "Pastel de Carne, Queijo e Ovo"
 }
 
 ###

@@ -6,6 +6,7 @@ import uvicorn
 from routers import FuncionarioRouter
 from routers import ClienteRouter
 from routers import ProdutoRouter
+from routers import AuthRouter
 
 # importa models para criar tabelas automaticamente
 from infra.orm import FuncionarioModel, ClienteModel, ProdutoModel
@@ -44,5 +45,6 @@ async def root():
 app.include_router(FuncionarioRouter.router)
 app.include_router(ClienteRouter.router)
 app.include_router(ProdutoRouter.router)
+app.include_router(AuthRouter.router)
 if __name__ == "__main__":
     uvicorn.run("main:app", host=HOST, port=int(PORT), reload=RELOAD)

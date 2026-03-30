@@ -3,11 +3,36 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from domain.schemas.ProdutoSchema import ProdutoCreate, ProdutoUpdate, ProdutoResponse
+from domain.schemas.AuthSchema import FuncionarioAuth
+from domain.schemas.ProdutoSchema import (
+    ProdutoCreate,
+    ProdutoUpdate,
+    ProdutoResponse,
+    ProdutoPublicoResponse,
+)
 from infra.orm.ProdutoModel import ProdutoDB
 from infra.database import get_db
+from infra.dependencies import get_current_active_user, require_group
 
 router = APIRouter()
+
+
+@router.get(
+    "/produto/publico",
+    response_model=List[ProdutoPublicoResponse],
+    tags=["Produto"],
+    status_code=status.HTTP_200_OK,
+)
+async def get_produtos_publicos(db: Session = Depends(get_db)):
+    """Retorna produtos para exibição pública sem id e valor"""
+    try:
+        produtos = db.query(ProdutoDB).all()
+        return produtos
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao buscar produtos públicos: {str(e)}",
+        )
 
 
 @router.get(
@@ -16,7 +41,10 @@ router = APIRouter()
     tags=["Produto"],
     status_code=status.HTTP_200_OK,
 )
-async def get_produtos(db: Session = Depends(get_db)):
+async def get_produtos(
+    db: Session = Depends(get_db),
+    current_user: FuncionarioAuth = Depends(get_current_active_user),
+):
     """Retorna todos os produtos"""
     try:
         produtos = db.query(ProdutoDB).all()
@@ -34,7 +62,11 @@ async def get_produtos(db: Session = Depends(get_db)):
     tags=["Produto"],
     status_code=status.HTTP_200_OK,
 )
-async def get_produto(id_prod: int, db: Session = Depends(get_db)):
+async def get_produto(
+    id_prod: int,
+    db: Session = Depends(get_db),
+    current_user: FuncionarioAuth = Depends(get_current_active_user),
+):
     """Retorna um produto por ID"""
     try:
         produto = db.query(ProdutoDB).filter(ProdutoDB.id == id_prod).first()
@@ -58,7 +90,11 @@ async def get_produto(id_prod: int, db: Session = Depends(get_db)):
     status_code=status.HTTP_201_CREATED,
     tags=["Produto"],
 )
-async def post_produto(produto_data: ProdutoCreate, db: Session = Depends(get_db)):
+async def post_produto(
+    produto_data: ProdutoCreate,
+    db: Session = Depends(get_db),
+    current_user: FuncionarioAuth = Depends(require_group([1])),
+):
     """Cria um novo produto"""
     try:
         novo_produto = ProdutoDB(
@@ -87,7 +123,10 @@ async def post_produto(produto_data: ProdutoCreate, db: Session = Depends(get_db
     status_code=status.HTTP_200_OK,
 )
 async def put_produto(
-    id_prod: int, produto_data: ProdutoUpdate, db: Session = Depends(get_db)
+    id_prod: int,
+    produto_data: ProdutoUpdate,
+    db: Session = Depends(get_db),
+    current_user: FuncionarioAuth = Depends(require_group([1])),
 ):
     """Atualiza um produto existente"""
     try:
@@ -114,7 +153,11 @@ async def put_produto(
 @router.delete(
     "/produto/{id_prod}", status_code=status.HTTP_200_OK, tags=["Produto"]
 )
-async def delete_produto(id_prod: int, db: Session = Depends(get_db)):
+async def delete_produto(
+    id_prod: int,
+    db: Session = Depends(get_db),
+    current_user: FuncionarioAuth = Depends(require_group([1])),
+):
     """Remove um produto"""
     try:
         produto = db.query(ProdutoDB).filter(ProdutoDB.id == id_prod).first()

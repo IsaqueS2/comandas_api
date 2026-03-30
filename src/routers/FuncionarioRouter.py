@@ -1,39 +1,36 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-
 # Domain Schemas
 from domain.schemas.FuncionarioSchema import (
-    FuncionarioCreate,
-    FuncionarioUpdate,
-    FuncionarioResponse,
+FuncionarioCreate,
+FuncionarioUpdate,
+FuncionarioResponse
 )
-
+from domain.schemas.AuthSchema import FuncionarioAuth
 # Infra
 from infra.orm.FuncionarioModel import FuncionarioDB
 from infra.database import get_db
 from infra.security import get_password_hash
+from infra.dependencies import get_current_active_user, require_group
 
 router = APIRouter()
 
 
-@router.get(
-    "/funcionario/",
-    response_model=List[FuncionarioResponse],
-    tags=["Funcionário"],
-    status_code=status.HTTP_200_OK,
-)
-async def get_funcionario(db: Session = Depends(get_db)):
-    """Retorna todos os funcionários"""
+@router.get("/funcionario/", response_model=List[FuncionarioResponse], tags=["Funcionário"], status_code=status.HTTP_200_OK, summary="Listar todos os funcionários")
+async def get_funcionario(
+    db: Session = Depends(get_db),
+    current_user: FuncionarioAuth = Depends(require_group([1]))
+):
+    """Retorna todos os funcionários - protegida por autenticação e grupo 1"""
     try:
         funcionarios = db.query(FuncionarioDB).all()
         return funcionarios
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao buscar funcionários: {str(e)}",
+            detail=f"Erro ao buscar funcionários: {str(e)}"
         )
-
 
 @router.get(
     "/funcionario/{id}",
@@ -41,7 +38,7 @@ async def get_funcionario(db: Session = Depends(get_db)):
     tags=["Funcionário"],
     status_code=status.HTTP_200_OK,
 )
-async def get_funcionario_by_id(id: int, db: Session = Depends(get_db)):
+async def get_funcionario_by_id(id: int, db: Session = Depends(get_db), current_user: FuncionarioAuth = Depends(get_current_active_user)):
     """Retorna um funcionário específico pelo ID"""
     try:
         funcionario = db.query(FuncionarioDB).filter(FuncionarioDB.id == id).first()
@@ -67,7 +64,8 @@ async def get_funcionario_by_id(id: int, db: Session = Depends(get_db)):
     tags=["Funcionário"],
 )
 async def post_funcionario(
-    funcionario_data: FuncionarioCreate, db: Session = Depends(get_db)
+    funcionario_data: FuncionarioCreate, db: Session = Depends(get_db),
+    current_user: FuncionarioAuth = Depends(require_group([1]))
 ):
     """Cria um novo funcionário"""
     try:
@@ -117,7 +115,8 @@ async def post_funcionario(
     status_code=status.HTTP_200_OK,
 )
 async def put_funcionario(
-    id: int, funcionario_data: FuncionarioUpdate, db: Session = Depends(get_db)
+    id: int, funcionario_data: FuncionarioUpdate, db: Session = Depends(get_db),
+    current_user: FuncionarioAuth = Depends(require_group([1]))
 ):
     """Atualiza um funcionário existente"""
     try:
@@ -167,7 +166,7 @@ async def put_funcionario(
     tags=["Funcionário"],
     summary="Remover funcionário",
 )
-async def delete_funcionario(id: int, db: Session = Depends(get_db)):
+async def delete_funcionario(id: int, db: Session = Depends(get_db), current_user: FuncionarioAuth = Depends(require_group([1]))):
     """Remove um funcionário"""
     try:
         funcionario = db.query(FuncionarioDB).filter(FuncionarioDB.id == id).first()
