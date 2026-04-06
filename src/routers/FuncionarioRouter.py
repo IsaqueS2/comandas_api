@@ -1,39 +1,41 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
+from services.AuditoriaService import AuditoriaService
 from sqlalchemy.orm import Session
-from typing import List
 
+from typing import List
 # Domain Schemas
 from domain.schemas.FuncionarioSchema import (
-    FuncionarioCreate,
-    FuncionarioUpdate,
-    FuncionarioResponse,
+FuncionarioCreate,
+FuncionarioUpdate,
+FuncionarioResponse
 )
-
+from domain.schemas.AuthSchema import FuncionarioAuth
 # Infra
 from infra.orm.FuncionarioModel import FuncionarioDB
 from infra.database import get_db
 from infra.security import get_password_hash
+from infra.dependencies import get_current_active_user, require_group
+from infra.rate_limit import limiter, get_rate_limit
 
 router = APIRouter()
 
 
-@router.get(
-    "/funcionario/",
-    response_model=List[FuncionarioResponse],
-    tags=["Funcionário"],
-    status_code=status.HTTP_200_OK,
-)
-async def get_funcionario(db: Session = Depends(get_db)):
-    """Retorna todos os funcionários"""
+@router.get("/funcionario/", response_model=List[FuncionarioResponse], tags=["Funcionário"], status_code=status.HTTP_200_OK, summary="Listar todos os funcionários")
+@limiter.limit(get_rate_limit("moderate"))
+async def get_funcionario(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: FuncionarioAuth = Depends(require_group([1]))
+):
+    """Retorna todos os funcionários - protegida por autenticação e grupo 1"""
     try:
         funcionarios = db.query(FuncionarioDB).all()
         return funcionarios
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao buscar funcionários: {str(e)}",
+            detail=f"Erro ao buscar funcionários: {str(e)}"
         )
-
 
 @router.get(
     "/funcionario/{id}",
@@ -41,7 +43,8 @@ async def get_funcionario(db: Session = Depends(get_db)):
     tags=["Funcionário"],
     status_code=status.HTTP_200_OK,
 )
-async def get_funcionario_by_id(id: int, db: Session = Depends(get_db)):
+@limiter.limit(get_rate_limit("moderate"))
+async def get_funcionario_by_id(request: Request, id: int, db: Session = Depends(get_db), current_user: FuncionarioAuth = Depends(get_current_active_user)):
     """Retorna um funcionário específico pelo ID"""
     try:
         funcionario = db.query(FuncionarioDB).filter(FuncionarioDB.id == id).first()
@@ -66,8 +69,11 @@ async def get_funcionario_by_id(id: int, db: Session = Depends(get_db)):
     status_code=status.HTTP_201_CREATED,
     tags=["Funcionário"],
 )
+@limiter.limit(get_rate_limit("restrictive"))
 async def post_funcionario(
-    funcionario_data: FuncionarioCreate, db: Session = Depends(get_db)
+    request: Request,
+    funcionario_data: FuncionarioCreate, db: Session = Depends(get_db),
+    current_user: FuncionarioAuth = Depends(require_group([1]))
 ):
     """Cria um novo funcionário"""
     try:
@@ -99,6 +105,16 @@ async def post_funcionario(
         db.add(novo_funcionario)
         db.commit()
         db.refresh(novo_funcionario)
+        AuditoriaService.registrar_acao(
+            db=db,
+            funcionario_id=current_user.id,
+            acao="CREATE",
+            recurso="funcionario",
+            recurso_id=novo_funcionario.id,
+            dados_antigos=None,
+            dados_novos=novo_funcionario, # Objeto SQLAlchemy com dados novos
+            request=request # Request completo para capturar IP e user agent
+        )
         return novo_funcionario
     except HTTPException:
         raise
@@ -116,8 +132,11 @@ async def post_funcionario(
     tags=["Funcionário"],
     status_code=status.HTTP_200_OK,
 )
+@limiter.limit(get_rate_limit("restrictive"))
 async def put_funcionario(
-    id: int, funcionario_data: FuncionarioUpdate, db: Session = Depends(get_db)
+    request: Request,
+    id: int, funcionario_data: FuncionarioUpdate, db: Session = Depends(get_db),
+    current_user: FuncionarioAuth = Depends(require_group([1]))
 ):
     """Atualiza um funcionário existente"""
     try:
@@ -144,12 +163,25 @@ async def put_funcionario(
         if funcionario_data.senha:
             funcionario_data.senha = get_password_hash(funcionario_data.senha)
 
+        # Captura dados antigos antes da alteração
+        dados_antigos = {col.name: getattr(funcionario, col.name) for col in funcionario.__table__.columns}
+
         # Atualiza apenas os campos fornecidos
         update_data = funcionario_data.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(funcionario, field, value)
         db.commit()
         db.refresh(funcionario)
+        AuditoriaService.registrar_acao(
+            db=db,
+            funcionario_id=current_user.id,
+            acao="UPDATE",
+            recurso="funcionario",
+            recurso_id=funcionario.id,
+            dados_antigos=dados_antigos,
+            dados_novos=funcionario,
+            request=request,
+        )
         return funcionario
     except HTTPException:
         raise
@@ -167,7 +199,8 @@ async def put_funcionario(
     tags=["Funcionário"],
     summary="Remover funcionário",
 )
-async def delete_funcionario(id: int, db: Session = Depends(get_db)):
+@limiter.limit(get_rate_limit("critical"))
+async def delete_funcionario(request: Request, id: int, db: Session = Depends(get_db), current_user: FuncionarioAuth = Depends(require_group([1]))):
     """Remove um funcionário"""
     try:
         funcionario = db.query(FuncionarioDB).filter(FuncionarioDB.id == id).first()
@@ -176,8 +209,18 @@ async def delete_funcionario(id: int, db: Session = Depends(get_db)):
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Funcionário não encontrado",
             )
+        dados_antigos = {col.name: getattr(funcionario, col.name) for col in funcionario.__table__.columns}
         db.delete(funcionario)
         db.commit()
+        AuditoriaService.registrar_acao(
+            db=db,
+            funcionario_id=current_user.id,
+            acao="DELETE",
+            recurso="funcionario",
+            recurso_id=id,
+            dados_antigos=dados_antigos,
+            request=request,
+        )
         return {"msg": "Funcionário deletado com sucesso", "id": id}
     except HTTPException:
         raise
