@@ -15,20 +15,27 @@ DB_NAME = os.getenv("DB_NAME")
 DB_HOST = os.getenv("DB_HOST")
 DB_USER = os.getenv("DB_USER")
 DB_PASS = os.getenv("DB_PASS")
-# Ajusta STR_DATABASE conforme gerenciador escolhido
+# Ajusta STR_DATABASE e ASYNC_STR_DATABASE conforme gerenciador escolhido
 if DB_SGDB == 'sqlite': # SQLite
 	# habilita foreign keys - integridade referencial - pragma
 	STR_DATABASE = f"sqlite:///{DB_NAME}.db?foreign_keys=1"
+	ASYNC_STR_DATABASE = f"sqlite+aiosqlite:///{DB_NAME}.db?foreign_keys=1"
 elif DB_SGDB == 'mysql': # MySQL
 	import pymysql
 	STR_DATABASE = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}?charset=utf8mb4"
+	ASYNC_STR_DATABASE = f"mysql+aiomysql://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}?charset=utf8mb4"
 elif DB_SGDB == 'mssql': # SQL Server
 	import pymssql
 	STR_DATABASE = f"mssql+pymssql://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}?charset=utf8"
+	ASYNC_STR_DATABASE = f"mssql+aioodbc://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}?charset=utf8"
 else: # SQLite
 	STR_DATABASE = f"sqlite:///apiDatabase.db?foreign_keys=1"
+	ASYNC_STR_DATABASE = f"sqlite+aiosqlite:///apiDatabase.db?foreign_keys=1"
 # Configurações JWT
 SECRET_KEY = os.getenv("SECRET_KEY", "@Isaq99249782A")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "15"))
 REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7"))
+
+ # Configurações de CORS
+CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*").split(",") if os.getenv("CORS_ORIGINS") else "*"

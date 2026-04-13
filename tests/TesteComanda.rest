@@ -1,0 +1,123 @@
+﻿# ISAQUE DE OLIVEIRA DOS SANTOS
+# URL base da API
+@baseUrl = http://localhost:8000
+
+@access_token = seuToken
+
+@comanda_id = 1
+@comanda_produto_id = 1
+
+### GET – Buscar comanda por ID
+GET {{baseUrl}}/comanda/{{comanda_id}} HTTP/1.1
+Authorization: Bearer {{access_token}}
+
+###
+### GET – Listar todas as comandas
+GET {{baseUrl}}/comanda/ HTTP/1.1
+Authorization: Bearer {{access_token}}
+
+###
+### GET – Filtrar comandas por status (0=aberta, 1=fechada, 2=cancelada)
+GET {{baseUrl}}/comanda/?status_filtro=0 HTTP/1.1
+Authorization: Bearer {{access_token}}
+
+###
+### GET – Listar comandas com paginação
+GET {{baseUrl}}/comanda/?skip=0&limit=10 HTTP/1.1
+Authorization: Bearer {{access_token}}
+
+###
+### GET – Listar comandas com paginação e filtro por status
+GET {{baseUrl}}/comanda/?skip=0&limit=5&status_filtro=1 HTTP/1.1
+Authorization: Bearer {{access_token}}
+
+###
+### POST – Criar nova comanda
+POST {{baseUrl}}/comanda/ HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+    "comanda": "COM-001",
+    "status": 0,
+    "funcionario_id": 2
+}
+
+###
+### POST – Criar nova comanda com cliente
+POST {{baseUrl}}/comanda/ HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+    "comanda": "COM-002",
+    "status": 0,
+    "cliente_id": 1,
+    "funcionario_id": 2
+}
+
+###
+### PUT – Atualizar comanda
+PUT {{baseUrl}}/comanda/{{comanda_id}} HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+    "comanda": "COM-001-EDIT",
+    "status": 0,
+    "funcionario_id": 2
+}
+
+###
+### PUT – Vincular/atualizar cliente na comanda (0 para remover)
+PUT {{baseUrl}}/comanda/{{comanda_id}} HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+    "cliente_id": 4
+}
+
+###
+### PUT – Cancelar comanda
+PUT {{baseUrl}}/comanda/{{comanda_id}}/cancelar HTTP/1.1
+Authorization: Bearer {{access_token}}
+
+###
+### DELETE – Remover comanda
+DELETE {{baseUrl}}/comanda/{{comanda_id}} HTTP/1.1
+Authorization: Bearer {{access_token}}
+
+###
+### GET – Listar produtos de uma comanda
+GET {{baseUrl}}/comanda/{{comanda_id}}/produtos HTTP/1.1
+Authorization: Bearer {{access_token}}
+
+###
+### POST – Adicionar produto à comanda
+POST {{baseUrl}}/comanda/{{comanda_id}}/produto HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+    "produto_id": 1,
+    "funcionario_id": 2,
+    "quantidade": 2,
+    "valor_unitario": 51.50
+}
+
+###
+### PUT – Atualizar produto na comanda (quantidade e/ou valor)
+PUT {{baseUrl}}/comanda/produto/{{comanda_produto_id}} HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+    "quantidade": 5,
+    "valor_unitario": 15.50
+}
+
+###
+### DELETE – Remover produto da comanda
+DELETE {{baseUrl}}/comanda/produto/{{comanda_produto_id}} HTTP/1.1
+Authorization: Bearer {{access_token}}

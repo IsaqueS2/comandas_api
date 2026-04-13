@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException, Request, status
-from sqlalchemy import text
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from sqlalchemy import func, select, text
+from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime, timezone
 import psutil
-from infra.database import get_db
+from infra.database import get_async_db
 from infra.orm.FuncionarioModel import FuncionarioDB
 from infra.rate_limit import limiter, get_rate_limit
 
@@ -23,12 +24,12 @@ async def health_check(request: Request):
 # Health check do banco de dados - Verifica conexão com banco de dados - Testa se consegue executar query simples
 @router.get("/health/database", tags=["Health"], summary="Health check do banco de dados - Verifica conexão com banco de dados - Testa se consegue executar query simples")
 @limiter.limit(get_rate_limit("low"))
-async def database_health(request: Request):
+async def database_health(request: Request, db: AsyncSession = Depends(get_async_db)):
 	try:
-		db = next(get_db())
 		# Query simples para testar conexão
-		result = db.execute(text("SELECT 1 as test")).fetchone()
-		if result and result[0] == 1:
+		result = await db.execute(text("SELECT 1 as test"))
+		row = result.fetchone()
+		if row and row[0] == 1:
 			return {
 				"status": "healthy",
 				"database": "connected",
@@ -39,28 +40,25 @@ async def database_health(request: Request):
 				status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
 				detail="Database query failed"
 			)
+	except HTTPException:
+		raise
 	except Exception as e:
 		raise HTTPException(
 			status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
 			detail=f"Database unavailable: {str(e)}"
 		)
-	finally:
-		try:
-			db.close()
-		except:
-			pass
 
 # Health check das tabelas - Verifica se tabelas críticas existem e têm dados
 @router.get("/health/database/tables", tags=["Health"], summary="Health check das tabelas - Verifica se tabelas críticas existem e têm dados")
 @limiter.limit(get_rate_limit("low"))
-async def database_tables_health(request: Request):
+async def database_tables_health(request: Request, db: AsyncSession = Depends(get_async_db)):
 	try:
-		db = next(get_db())
 		# Verifica tabelas críticas
 		checks = {}
 		# Verifica tabela funcionário
 		try:
-			count = db.query(FuncionarioDB).count()
+			result = await db.execute(select(func.count()).select_from(FuncionarioDB))
+			count = result.scalar()
 			checks["funcionarios"] = {
 				"status": "healthy",
 				"count": count
@@ -85,11 +83,6 @@ async def database_tables_health(request: Request):
 			status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
 			detail=f"Database tables check failed: {str(e)}"
 		)
-	finally:
-		try:
-			db.close()
-		except:
-			pass
 
 # Health check do sistema - Verifica recursos do sistema (memória, disco, CPU)
 @router.get("/health/system", tags=["Health"], summary="Health check do sistema - Verifica recursos do sistema (memória, disco, CPU)")
@@ -143,7 +136,7 @@ async def system_health(request: Request):
 # Health check completo - Verificação completa de todos os componentes
 @router.get("/health/full", tags=["Health"], summary="Health check completo - Verificação completa de todos os componentes")
 @limiter.limit(get_rate_limit("low"))
-async def full_health_check(request: Request):
+async def full_health_check(request: Request, db: AsyncSession = Depends(get_async_db)):
 	try:
 		# Coleta todos os health checks
 		checks = {}
@@ -151,10 +144,8 @@ async def full_health_check(request: Request):
 		checks["api"] = {"status": "healthy", "message": "API responding"}
 		# Database Status
 		try:
-			db = next(get_db())
-			db.execute(text("SELECT 1"))
+			await db.execute(text("SELECT 1"))
 			checks["database"] = {"status": "healthy", "message": "Database connected"}
-			db.close()
 		except Exception as e:
 			checks["database"] = {"status": "unhealthy", "message": str(e)}
 		# System Status
@@ -184,12 +175,10 @@ async def full_health_check(request: Request):
 # Readiness probe - Verifica se API está pronta para receber tráfego - Similar ao health mas pode incluir verificações adicionais
 @router.get("/ready", tags=["Health"], summary="Readiness probe - Verifica se API está pronta para receber tráfego - Similar ao health mas pode incluir verificações adicionais")
 @limiter.limit(get_rate_limit("low"))
-async def readiness_check(request: Request):
+async def readiness_check(request: Request, db: AsyncSession = Depends(get_async_db)):
 	# Verifica se banco está acessível
 	try:
-		db = next(get_db())
-		db.execute(text("SELECT 1"))
-		db.close()
+		await db.execute(text("SELECT 1"))
 	except Exception as e:
 		raise HTTPException(
 			status_code=status.HTTP_503_SERVICE_UNAVAILABLE,

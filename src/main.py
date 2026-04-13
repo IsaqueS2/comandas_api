@@ -1,70 +1,72 @@
-from fastapi import FastAPI
-from settings import HOST, PORT, RELOAD
-from infra.rate_limit import limiter, rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
+﻿from contextlib import asynccontextmanager
+
 import uvicorn
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from slowapi.errors import RateLimitExceeded
 
-# import das classes com as rotas/endpoints
-from routers import AuditoriaRouter
-from routers import FuncionarioRouter
-from routers import ClienteRouter
-from routers import ProdutoRouter
-from routers import AuthRouter
-from routers import HealthRouter
-
-# lifespan - ciclo de vida da aplicação
-'''
-Função lifespan que gerencia o ciclo de vida da aplicação FastAPI.
-Args:
-app (FastAPI): Instância da aplicação FastAPI.
-Esta função é um gerenciador de contexto assíncrono que executa ações no startup e no shutdown da aplicação.
-No startup:
-- Imprime "API has started".
-- Importa o módulo `db` e chama a função `criaTabelas` para criar as tabelas dos modelos encontrados na aplicação.
-No shutdown:
-- Imprime "API is shutting down".
-'''
 from infra import database
-from contextlib import asynccontextmanager
+from infra.ip_filter import IPFilterMiddleware
+from infra.rate_limit import limiter, rate_limit_exceeded_handler
+from routers import (
+    AuditoriaRouter,
+    AuthRouter,
+    ClienteRouter,
+    ComandaRouter,
+    FuncionarioRouter,
+    HealthRouter,
+    ProdutoRouter,
+
+)
+from settings import CORS_ORIGINS, HOST, PORT, RELOAD
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-	# executa no startup
-	print("API has started")
-	# cria, caso não existam, as tabelas de todos os modelos que encontrar na aplicação (importados)
-	await database.cria_tabelas()
-	yield
-	# executa no shutdown
-	print("API is shutting down")
+    # executa no startup
+    print("API has started")
+    await database.cria_tabelas()
+    yield
+    # executa no shutdown
+    print("API is shutting down")
 
 
-# cria a aplicação FastAPI com o contexto de vida
 app = FastAPI(lifespan=lifespan)
 
-# app = FastAPI()  # Configuração de Rate Limiting
-app.state.limiter = limiter
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=CORS_ORIGINS,
+    allow_credentials=False if "*" in CORS_ORIGINS else True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["Content-Type", "Authorization"],
+    expose_headers=["*"],
+    max_age=600,
+)
+# Adicionado por último = executado primeiro (camada mais externa).
+# Bloqueia requisições de origens/IPs não listados em CORS_ORIGINS.
+# Inativo quando CORS_ORIGINS="*" (padrão de desenvolvimento).
+app.add_middleware(IPFilterMiddleware, allowed_origins=CORS_ORIGINS)
 
-# Registrar handler personalizado ANTES de incluir rotas
+app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 
-# rota padrão
+
 @app.get("/", tags=["Root"], status_code=200, summary="Informações da API - pública")
 async def root():
-	return {
-		"detail": "API Comandas",
-		"Swagger UI": "http://127.0.0.1:8000/docs",
-		"ReDoc": "http://127.0.0.1:8000/redoc",
-	}
+    return {
+        "detail": "API Comandas",
+        "Swagger UI": "http://127.0.0.1:8000/docs",
+        "ReDoc": "http://127.0.0.1:8000/redoc",
+    }
 
 
-# incluir as rotas/endpoints no FastAPI
 app.include_router(AuditoriaRouter.router)
 app.include_router(AuthRouter.router)
 app.include_router(FuncionarioRouter.router)
 app.include_router(ClienteRouter.router)
 app.include_router(ProdutoRouter.router)
+app.include_router(ComandaRouter.router)
 app.include_router(HealthRouter.router)
 
 if __name__ == "__main__":
-	uvicorn.run("main:app", host=HOST, port=int(PORT), reload=RELOAD)
+    uvicorn.run("main:app", host=HOST, port=int(PORT), reload=RELOAD)

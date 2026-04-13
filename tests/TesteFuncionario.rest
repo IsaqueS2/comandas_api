@@ -8,6 +8,34 @@
 GET {{baseUrl}}/funcionario/ HTTP/1.1
 
 ###
+### GET – Listar com paginação
+GET {{baseUrl}}/funcionario/?skip=0&limit=10 HTTP/1.1
+
+###
+### GET – Filtrar por nome (parcial)
+GET {{baseUrl}}/funcionario/?nome=isaque HTTP/1.1
+
+###
+### GET – Filtrar por grupo(s) separados por vírgula
+GET {{baseUrl}}/funcionario/?grupo=1,2 HTTP/1.1
+
+###
+### GET – Filtrar por CPF
+GET {{baseUrl}}/funcionario/?cpf=11111111111 HTTP/1.1
+
+###
+### GET – Filtrar por matrícula
+GET {{baseUrl}}/funcionario/?matricula=123455 HTTP/1.1
+
+###
+### GET – Filtrar por telefone
+GET {{baseUrl}}/funcionario/?telefone=11999999999 HTTP/1.1
+
+###
+### GET – Combinar filtros e paginação
+GET {{baseUrl}}/funcionario/?grupo=1&nome=isaque&skip=0&limit=5 HTTP/1.1
+
+###
 ### GET – Buscar funcionário por ID
 GET {{baseUrl}}/funcionario/{{id}} HTTP/1.1
 
