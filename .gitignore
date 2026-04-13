@@ -8,4 +8,14 @@ share/
 pyvenv.cfg
 .idea
 .vscode
-comandas_db.db
+# Bancos de dados
+*.db
+# Variáveis de ambiente (contém credenciais)
+src/.env
+# Certificados e chaves privadas
+cert/
+# Logs de saída
+api_out.txt
+api_out2.txt
+api_err.txt
+api_err2.txt

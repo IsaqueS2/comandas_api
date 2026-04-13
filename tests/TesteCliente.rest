@@ -8,6 +8,26 @@
 GET {{baseUrl}}/cliente/ HTTP/1.1
 
 ###
+### GET – Listar com paginação
+GET {{baseUrl}}/cliente/?skip=0&limit=10 HTTP/1.1
+
+###
+### GET – Filtrar por nome (parcial)
+GET {{baseUrl}}/cliente/?nome=isaque HTTP/1.1
+
+###
+### GET – Filtrar por CPF
+GET {{baseUrl}}/cliente/?cpf=13134567899 HTTP/1.1
+
+###
+### GET – Filtrar por telefone
+GET {{baseUrl}}/cliente/?telefone=49999999999 HTTP/1.1
+
+###
+### GET – Combinar filtros e paginação
+GET {{baseUrl}}/cliente/?nome=ana&skip=0&limit=5 HTTP/1.1
+
+###
 ### GET – Buscar cliente por ID
 GET {{baseUrl}}/cliente/{{id}} HTTP/1.1
 
@@ -34,7 +54,7 @@ content-type: application/json
 }
 
 ###
-### POST – Cadastrar cliente 3
+### POST – Cadastrar cliente 3 (com todos os campos)
 POST {{baseUrl}}/cliente/ HTTP/1.1
 content-type: application/json
 
@@ -45,7 +65,26 @@ content-type: application/json
 }
 
 ###
-### PUT – Atualizar cliente
+### POST – Cadastrar cliente somente com nome (cpf e telefone opcionais)
+POST {{baseUrl}}/cliente/ HTTP/1.1
+content-type: application/json
+
+{
+    "nome": "Maria Luiza"
+}
+
+###
+### POST – Cadastrar cliente com nome e telefone (sem cpf)
+POST {{baseUrl}}/cliente/ HTTP/1.1
+content-type: application/json
+
+{
+    "nome": "João Pedro",
+    "telefone": "48911112222"
+}
+
+###
+### PUT – Atualizar cliente (nome e telefone)
 PUT {{baseUrl}}/cliente/{{id}} HTTP/1.1
 content-type: application/json
 

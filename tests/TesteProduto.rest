@@ -8,6 +8,38 @@
 GET {{baseUrl}}/produto/ HTTP/1.1
 
 ###
+### GET – Listar com paginação
+GET {{baseUrl}}/produto/?skip=0&limit=10 HTTP/1.1
+
+###
+### GET – Filtrar por nome (parcial)
+GET {{baseUrl}}/produto/?nome=batata HTTP/1.1
+
+###
+### GET – Filtrar por descrição (parcial)
+GET {{baseUrl}}/produto/?descricao=porção HTTP/1.1
+
+###
+### GET – Filtrar por valor exato
+GET {{baseUrl}}/produto/?valor=22.50 HTTP/1.1
+
+###
+### GET – Filtrar por valor mínimo (>=)
+GET {{baseUrl}}/produto/?valor_min=10.00 HTTP/1.1
+
+###
+### GET – Filtrar por valor máximo (<=)
+GET {{baseUrl}}/produto/?valor_max=20.00 HTTP/1.1
+
+###
+### GET – Filtrar por intervalo de valor
+GET {{baseUrl}}/produto/?valor_min=5.00&valor_max=25.00 HTTP/1.1
+
+###
+### GET – Combinar filtros e paginação
+GET {{baseUrl}}/produto/?nome=fritas&valor_max=30.00&skip=0&limit=5 HTTP/1.1
+
+###
 ### GET – Buscar produto por ID
 GET {{baseUrl}}/produto/{{id}} HTTP/1.1
 
@@ -45,13 +77,38 @@ content-type: application/json
 }
 
 ###
-### PUT – Atualizar produto
+### PUT – Atualizar produto (somente nome)
 PUT {{baseUrl}}/produto/{{id}} HTTP/1.1
 content-type: application/json
 
 {
     "nome": "Pastel de Carne, Queijo e Ovo"
 }
+
+###
+### PUT – Alterar valor do produto (gera nova entrada no histórico de preços)
+PUT {{baseUrl}}/produto/{{id}} HTTP/1.1
+content-type: application/json
+
+{
+    "valor_unitario": 14.90
+}
+
+###
+### GET – Consultar histórico de preços do produto
+GET {{baseUrl}}/produto/{{id}}/historico-precos HTTP/1.1
+
+###
+### GET – Produtos públicos (sem autenticação, sem valor/id)
+GET {{baseUrl}}/produto/publico HTTP/1.1
+
+###
+### GET – Produtos públicos filtrados por nome
+GET {{baseUrl}}/produto/publico?nome=batata HTTP/1.1
+
+###
+### GET – Produtos públicos filtrados por intervalo de valor
+GET {{baseUrl}}/produto/publico?valor_min=5.00&valor_max=20.00 HTTP/1.1
 
 ###
 ### DELETE – Excluir produto

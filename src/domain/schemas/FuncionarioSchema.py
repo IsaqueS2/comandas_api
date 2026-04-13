@@ -1,23 +1,24 @@
-from pydantic import BaseModel, ConfigDict
-from typing import Optional
+from typing import Literal, Optional
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class FuncionarioCreate(BaseModel):
-    nome: str
-    matricula: str
-    cpf: str
-    telefone: str
-    grupo: int
-    senha: str
+    nome: str = Field(..., min_length=1)
+    matricula: str = Field(..., min_length=1, max_length=10)
+    cpf: str = Field(..., min_length=11, max_length=11)
+    telefone: str = Field(..., min_length=10, max_length=11)
+    senha: str = Field(..., min_length=6)
+    grupo: Literal[1, 2, 3]
 
 
 class FuncionarioUpdate(BaseModel):
-    nome: Optional[str] = None
-    matricula: Optional[str] = None
-    cpf: Optional[str] = None
-    telefone: Optional[str] = None
-    grupo: Optional[int] = None
-    senha: Optional[str] = None
+    nome: Optional[str] = Field(None, min_length=1)
+    matricula: Optional[str] = Field(None, min_length=1, max_length=10)
+    cpf: Optional[str] = Field(None, min_length=11, max_length=11)
+    telefone: Optional[str] = Field(None, min_length=10, max_length=11)
+    senha: Optional[str] = Field(None, min_length=6)
+    grupo: Optional[Literal[1, 2, 3]] = None
 
 
 class FuncionarioResponse(BaseModel):

@@ -2,7 +2,7 @@
 @access_token = seuToken
 
 ###
-### Listar ações e recursos já utilizados e disponíveis para filtro
+### Listar ações e recursos disponíveis para filtro
 GET http://localhost:8000/auditoria/acoes
 Authorization: Bearer {{access_token}}
 
@@ -12,11 +12,51 @@ GET http://localhost:8000/auditoria
 Authorization: Bearer {{access_token}}
 
 ###
-### Listar auditoria com múltiplos filtros e paginação
-GET http://localhost:8000/auditoria?funcionario_id=1&acao=LOGIN,CREATE&recurso=auth,comanda&data_inicio=2024-01-01&data_fim=2024-12-31&skip=0&limite=50
+### Listar com paginação
+GET http://localhost:8000/auditoria?skip=0&limite=50
 Authorization: Bearer {{access_token}}
 
 ###
-### Paginação - segunda página
-GET http://localhost:8000/auditoria?skip=50&limite=50
+### Filtrar por ID do registro
+GET http://localhost:8000/auditoria?id=1
+Authorization: Bearer {{access_token}}
+
+###
+### Filtrar por funcionário
+GET http://localhost:8000/auditoria?funcionario_id=1
+Authorization: Bearer {{access_token}}
+
+###
+### Filtrar por ação(ões) separadas por vírgula
+GET http://localhost:8000/auditoria?acao=LOGIN,CREATE
+Authorization: Bearer {{access_token}}
+
+###
+### Filtrar por recurso(s) separados por vírgula
+GET http://localhost:8000/auditoria?recurso=comanda,produto
+Authorization: Bearer {{access_token}}
+
+###
+### Filtrar por ID do recurso
+GET http://localhost:8000/auditoria?recurso_id=5
+Authorization: Bearer {{access_token}}
+
+###
+### Filtrar por IP
+GET http://localhost:8000/auditoria?ip_address=127.0.0.1
+Authorization: Bearer {{access_token}}
+
+###
+### Filtrar por user agent (parcial)
+GET http://localhost:8000/auditoria?user_agent=Mozilla
+Authorization: Bearer {{access_token}}
+
+###
+### Filtrar por intervalo de data
+GET http://localhost:8000/auditoria?data_inicio=2025-01-01&data_fim=2025-12-31
+Authorization: Bearer {{access_token}}
+
+###
+### Combinar múltiplos filtros com paginação
+GET http://localhost:8000/auditoria?funcionario_id=1&acao=CREATE,UPDATE&recurso=comanda&data_inicio=2025-01-01&skip=0&limite=20
 Authorization: Bearer {{access_token}}
