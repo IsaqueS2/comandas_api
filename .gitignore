@@ -12,6 +12,8 @@ pyvenv.cfg
 *.db
 # Variáveis de ambiente (contém credenciais)
 src/.env
+/.env
+.env
 # Certificados e chaves privadas
 cert/
 # Logs de saída
