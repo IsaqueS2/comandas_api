@@ -94,8 +94,8 @@ function Run-Docker {
     docker run --rm `
         --name comandas-api `
         -p 4443:4443 `
-        -v "$certDir:/cert" `
-        -v "$srcDir:/app" `
+        -v "${certDir}:/cert" `
+        -v "${srcDir}:/app" `
         --health-cmd='curl -f https://localhost:4443/health --insecure || exit 1' `
         --health-interval=30s `
         --health-timeout=10s `

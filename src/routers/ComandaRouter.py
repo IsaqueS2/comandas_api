@@ -218,7 +218,12 @@ async def update_comanda(id: int, comanda_data: ComandaUpdate, request: Request,
         # Atualizar campos se fornecidos
         if comanda_data.comanda is not None:
             comanda.comanda = comanda_data.comanda
-        if comanda_data.status is not None:
+        if comanda_data.status is not None and comanda.status != comanda_data.status:
+            if comanda.status == 1:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST, 
+                    detail="Não é possível alterar manualmente o status de uma comanda já fechada (paga). Se houver erro, realize o estorno do pagamento."
+                )
             comanda.status = comanda_data.status
         if comanda_data.cliente_id is not None:
             if comanda_data.cliente_id != 0:  # 0 para remover cliente

@@ -1,4 +1,4 @@
-﻿from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import FastAPI
@@ -16,7 +16,7 @@ from routers import (
     FuncionarioRouter,
     HealthRouter,
     ProdutoRouter,
-
+    RecebimentoRouter,
 )
 from settings import CORS_ORIGINS, HOST, PORT, RELOAD
 
@@ -66,6 +66,7 @@ app.include_router(FuncionarioRouter.router)
 app.include_router(ClienteRouter.router)
 app.include_router(ProdutoRouter.router)
 app.include_router(ComandaRouter.router)
+app.include_router(RecebimentoRouter.router)
 app.include_router(HealthRouter.router)
 
 if __name__ == "__main__":

@@ -31,8 +31,7 @@ async def cria_tabelas():
         await conn.run_sync(Base.metadata.create_all)
 
 
-# importa modelos para garantir montagem de tabela no startup
-from infra.orm import ClienteModel, FuncionarioModel, ProdutoModel, ProdutoPrecoHistoricoModel
+from infra.orm import ClienteModel, FuncionarioModel, ProdutoModel, ProdutoPrecoHistoricoModel, RecebimentoModel
 
 
 # dependência para injetar a sessão síncrona nas rotas
